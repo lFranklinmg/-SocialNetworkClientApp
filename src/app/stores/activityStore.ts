@@ -9,7 +9,7 @@ export default class ActivityStore{
     selectedActivity: Activity | undefined = undefined;
     editMode = false;
     loading = false;
-    loadingInitial = true;
+    loadingInitial = false;
 
     constructor() {
         makeAutoObservable(this)
@@ -17,17 +17,19 @@ export default class ActivityStore{
 
     //Computed Property
     get activitiesByDate(){
-        return Array.from(this.activityRegistry.values()).sort((a,b)=>(Date.parse(a.date) - Date.parse(b.date)));
+        return Array.from(this.activityRegistry.values()).sort((a,b)=>(Date.parse(b.date) - Date.parse(a.date)));
     }
 
     loadActivities = async () => {
+        this.setLoadingInitial(true);
 
         try{
             const activities = await agent.Activities.list();
                 activities.forEach(activity =>{
-                    activity.date = activity.date.split('T')[0];
+                    //activity.date = activity.date.split('T')[0];
                     //this.activities.push(item);
-                    this.activityRegistry.set(activity.id, activity);
+                    //this.activityRegistry.set(activity.id, activity);
+                    this.setActivity(activity);
                 })
                 this.setLoadingInitial(false);
 
@@ -35,6 +37,39 @@ export default class ActivityStore{
             console.log(error);
             this.setLoadingInitial(false);
         }
+    }
+
+    loadActivity = async (id: string)=>{
+        this.setLoadingInitial(true);
+        let activity = this.getActivity(id);
+
+        if (activity){
+            this.selectedActivity = activity;
+            this.setLoadingInitial(false);
+            return activity;
+        } 
+        else{
+            this.setLoadingInitial(true);
+            try{
+                activity = await agent.Activities.details(id);
+                this.setActivity(activity);
+                runInAction(()=> this.selectedActivity = activity);
+                this.setLoadingInitial(false);
+                return activity;
+            }catch(error){
+                console.log(error);
+                this.setLoadingInitial(false);
+            }
+        }
+    }
+
+    private setActivity = (activity: Activity)=>{
+        activity.date = activity.date.split('T')[0];
+        this.activityRegistry.set(activity.id, activity);
+    }
+
+    private getActivity = (id: string)=>{
+        return this.activityRegistry.get(id);
     }
 
     setLoadingInitial = (state: boolean)=>{
@@ -49,6 +84,7 @@ export default class ActivityStore{
 
     }
 
+    /*
     selectActivity = (id: string) =>{
         //var result = this.findActivity(id);
         //this.selectedActivity = result;
@@ -69,7 +105,7 @@ export default class ActivityStore{
 
     closeForm = () =>{
         this.editMode = false;
-    }
+    }*/
 
     createActivity = async (activity: Activity)=>{
         this.loading = true;
@@ -80,7 +116,7 @@ export default class ActivityStore{
             runInAction(()=>{
                 //this.activities.push(activity);
                 this.activityRegistry.set(activity.id, activity);
-                this.selectActivity(activity.id);
+                this.selectedActivity = activity;
                 //this.selectedActivity = activity
                 this.editMode = false;
                 this.loading = false;
@@ -135,7 +171,7 @@ export default class ActivityStore{
                 //this.activities = [...this.activities.filter(x => x.id !== id)];
                 this.activityRegistry.delete(id);
                 this.loading = false;
-                if(this.selectedActivity?.id === id) this.cancelSelectedActivity();
+                //if(this.selectedActivity?.id === id) this.cancelSelectedActivity();
                 //this.cancelSelectedActivity();
             })
             
