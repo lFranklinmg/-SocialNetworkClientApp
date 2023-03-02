@@ -20,6 +20,17 @@ export default class ActivityStore{
         return Array.from(this.activityRegistry.values()).sort((a,b)=>(Date.parse(b.date) - Date.parse(a.date)));
     }
 
+    //REDUCE Computed function 
+    get groupedActivities(){
+        return Object.entries(
+            this.activitiesByDate.reduce((activities, activity) =>{
+                const date = activity.date; //date for each element = Key object
+                activities[date] = activities[date] ? [...activities[date], activity] : [activity];
+                return activities;
+            }, {} as {[key: string]: Activity[]})
+        )
+    }
+
     loadActivities = async () => {
         this.setLoadingInitial(true);
 
@@ -83,29 +94,6 @@ export default class ActivityStore{
         return activityByDate
 
     }
-
-    /*
-    selectActivity = (id: string) =>{
-        //var result = this.findActivity(id);
-        //this.selectedActivity = result;
-        //this.selectedActivity = this.activities.find(x => x.id == id);
-        this.selectedActivity = this.activityRegistry.get(id);
-        
-    }
-
-    cancelSelectedActivity = ()=>{
-        this.selectedActivity = undefined;
-    }
-
-    openForm = (id?: string)=>{
-        //console.log("Id do item:" + id);
-        id ? this.selectActivity(id) : this.cancelSelectedActivity();
-        this.editMode = true;
-    }
-
-    closeForm = () =>{
-        this.editMode = false;
-    }*/
 
     createActivity = async (activity: Activity)=>{
         this.loading = true;
@@ -183,4 +171,27 @@ export default class ActivityStore{
         }
 
     }
+
+     /*
+    selectActivity = (id: string) =>{
+        //var result = this.findActivity(id);
+        //this.selectedActivity = result;
+        //this.selectedActivity = this.activities.find(x => x.id == id);
+        this.selectedActivity = this.activityRegistry.get(id);
+        
+    }
+
+    cancelSelectedActivity = ()=>{
+        this.selectedActivity = undefined;
+    }
+
+    openForm = (id?: string)=>{
+        //console.log("Id do item:" + id);
+        id ? this.selectActivity(id) : this.cancelSelectedActivity();
+        this.editMode = true;
+    }
+
+    closeForm = () =>{
+        this.editMode = false;
+    }*/
 }

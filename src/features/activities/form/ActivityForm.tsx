@@ -44,7 +44,6 @@ export default observer(function ActivityForm(){
     function handleInputChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>){
         const {name, value} = event.target;
         setActivity({...activity, [name]:value})
-
     }
 
     if (loadingInitial) return <LoadingComponent content='Loading Post...'/>
