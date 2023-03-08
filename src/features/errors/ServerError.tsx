@@ -4,6 +4,7 @@ import { useStore } from "../../app/stores/store";
 
 export default observer(function ServerError(){
     const {commonStore} = useStore();
+    
     return(
         <Container>
             <Header as='h1' content='Server-Error'/>
