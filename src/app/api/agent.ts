@@ -1,7 +1,9 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { Console } from 'console';
+import axios, { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
+import { config } from 'process';
 import { toast } from 'react-toastify';
 import { Activity } from '../models/activity';
+import { User } from '../models/user';
+import { UserFormValues } from '../models/userFormValues';
 import { router } from '../router/Routes';
 import { store } from '../stores/store';
 
@@ -13,6 +15,22 @@ const sleep = (delay: number) =>{
 
 axios.defaults.baseURL = 'https://localhost:7175/';
 
+const responseBody = <T> (response: AxiosResponse<T>) => response.data;
+
+//Axios way out Interceptors | Request
+axios.interceptors.request.use(config => {
+    
+    const token = store.commonStore.token;
+    //config.headers = {...config.headers} as AxiosHeaders;
+    if(token && config.headers)  (config.headers as AxiosHeaders).set("Authorization", `Bearer ${token}`);
+
+    //if(token && config.headers) config.headers.set('Authorization','Bearer ${token}');
+        
+    return config;
+})
+
+
+//Axios way back Interceptors | response
 axios.interceptors.response.use(async response => {
         await sleep(1000);
         return response;
@@ -56,9 +74,6 @@ axios.interceptors.response.use(async response => {
     return Promise.reject(error);
 })
 
-
-const responseBody = <T> (response: AxiosResponse<T>) => response.data;
-
 const requests = {
     get:    <T> (url: string)           => axios.get<T>(url).then(responseBody),
     post:   <T> (url: string, body: {}) => axios.post<T>(url, body).then(responseBody),
@@ -75,8 +90,17 @@ const Activities = {
 
 }
 
+const Account = {
+    current: () => requests.get<User>('/account'),
+    login: (user: UserFormValues) => requests.post<User>('/account/login', user),
+    register: (user: UserFormValues) => requests.post<User>('/account/register', user)
+
+
+}
+
 const agent = {
-    Activities
+    Activities,
+    Account
 }
 
 export default agent;

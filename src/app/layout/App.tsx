@@ -1,31 +1,47 @@
 import React, { useEffect } from 'react';
-import { Button, Container } from 'semantic-ui-react';
+import { Button, Container, Modal } from 'semantic-ui-react';
 import Navbar from './Navbar';
-import ActivityDashboard from '../../features/activities/dashboard/ActivityDashboard';
 import LoadingComponent from './LoadingComponent';
 import { useStore } from '../stores/store';
 import { observer } from 'mobx-react-lite';
 import { Outlet, useLocation,  } from 'react-router-dom';
 import HomePage from '../../features/home/HomePage';
 import { ToastContainer } from 'react-toastify';
+import ModalConteiner from '../common/modals/ModalConteiner';
 
 function App() {
 
-  const {activityStore} = useStore();
   const location = useLocation();
+  const {userStore, commonStore} = useStore();
 
-   return (
+  useEffect(() =>{
+    if(commonStore.token){
+      userStore.getUser().finally(() => {
+        commonStore.setAppLoaded();
+      });
+    }else{
+      commonStore.setAppLoaded();
+    }
+  }, [commonStore, userStore])
+
+  if (!commonStore.appLoaded) return <LoadingComponent content='...Loggin in App'/>
+
+  return (
+
     <>
-    <ToastContainer position='bottom-right' hideProgressBar theme='colored' />
-    {location.pathname === '/' ? <HomePage/> : (
-      <>
-           <Navbar />
-           <Container style={{marginTop: '8em'}}>
-             <Outlet />
-           </Container>
-      </>
-    )};
+      <ModalConteiner />
+      <ToastContainer position='bottom-right' hideProgressBar theme='colored' />
+      {location.pathname === '/' ? <HomePage/> : (
+        <>
+              <Navbar />
+              <Container style={{marginTop: '8em'}}>
+                <Outlet />
+              </Container>
+        </>
+      )};
+
     </>
+
   );
 }
 
