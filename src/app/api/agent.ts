@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosHeaders, AxiosResponse } from 'axios';
 import { config } from 'process';
 import { toast } from 'react-toastify';
-import { Activity } from '../models/activity';
+import { Activity, ActivityFormValues } from '../models/activity';
 import { User } from '../models/user';
 import { UserFormValues } from '../models/userFormValues';
 import { router } from '../router/Routes';
@@ -78,24 +78,22 @@ const requests = {
     get:    <T> (url: string)           => axios.get<T>(url).then(responseBody),
     post:   <T> (url: string, body: {}) => axios.post<T>(url, body).then(responseBody),
     put:    <T> (url: string, body: {}) => axios.put<T>(url, body).then(responseBody),
-    delete: <T> (url: string)           => axios.delete<T>(url).then(responseBody),
+    del:    <T> (url: string)           => axios.delete<T>(url).then(responseBody),
 }
 
 const Activities = {
     list: () => requests.get<Activity[]>('/Activities'),
     details: (id: string) => requests.get<Activity>(`/Activities/${id}`),
-    create: (activity: Activity) => requests.post<void>('/Activities', activity),
-    update: (activity: Activity) => requests.put<void>(`/Activities/${activity.id}`, activity),
-    delete: (id: string) => requests.delete<void>(`/Activities/${id}`)
-
+    create: (activity: ActivityFormValues) => requests.post<void>('/Activities', activity),
+    update: (activity: ActivityFormValues) => requests.put<void>(`/Activities/${activity.id}`, activity),
+    delete: (id: string) => requests.del<void>(`/Activities/${id}`),
+    attend: (id: string) => requests.post<void>(`/Activities/attend/${id}`, {})
 }
 
 const Account = {
     current: () => requests.get<User>('/account'),
     login: (user: UserFormValues) => requests.post<User>('/account/login', user),
     register: (user: UserFormValues) => requests.post<User>('/account/register', user)
-
-
 }
 
 const agent = {
