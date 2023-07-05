@@ -79,14 +79,16 @@ export default class ActivityStore{
 
     private setActivity = (activity: Activity)=>{
        
-        //Check if User is an Attendee
         const user = store.userStore.user;
+        //console.log(user?.userName);
+        //Check if is authenticated
         if (user) {
             activity.isGoing = activity.attendees!.some(
-                a => a.userName === user.username
+                a => a.userName === user.userName
             )
-            activity.isHost = activity.hostUsername === user.username;
-            activity.host = activity.attendees?.find(x => x.userName === activity.hostUsername);
+            //console.log(activity.hostUsername);
+            activity.isHost = activity.hostUserName === user.userName;
+            activity.host = activity.attendees?.find(x => x.userName === activity.hostUserName);
         }
         //activity.date = activity.date.split('T')[0];
         //this.activities.push(item);
@@ -120,7 +122,7 @@ export default class ActivityStore{
         try{
             await agent.Activities.create(activity);
             const newActivity = new Activity(activity);
-            newActivity.hostUsername = user!.username;
+            newActivity.hostUserName = user!.userName;
             newActivity.attendees = [attendee];
             this.setActivity(newActivity);
             runInAction(()=>{
@@ -206,7 +208,7 @@ export default class ActivityStore{
             await agent.Activities.attend(this.selectedActivity!.id);
             runInAction(()=>{
                 if(this.selectedActivity?.isGoing){
-                    this.selectedActivity.attendees = this.selectedActivity.attendees?.filter(a => a.userName !== user?.username);
+                    this.selectedActivity.attendees = this.selectedActivity.attendees?.filter(a => a.userName !== user?.userName);
                     this.selectedActivity.isGoing = false;
                 }
                 else{

@@ -1,6 +1,6 @@
 export interface UserFormValues{
     email: string;
     password: string;
-    displayname?: string;
+    displayName?: string;
     userName?: string;
 }
