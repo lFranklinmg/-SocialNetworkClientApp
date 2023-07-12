@@ -6,7 +6,7 @@ import { User } from '../models/user';
 import { UserFormValues } from '../models/userFormValues';
 import { router } from '../router/Routes';
 import { store } from '../stores/store';
-import { Profile } from '../models/profile';
+import { Photo, Profile } from '../models/profile';
 
 const sleep = (delay: number) =>{
     return new Promise((resolve) =>{
@@ -98,7 +98,16 @@ const Account = {
 }
 
 const Profiles = {
-    get: (username: string) => requests.get<Profile>(`/profiles/${username}`)
+    get: (username: string) => requests.get<Profile>(`/profiles/${username}`),
+    uploadPhoto: (file: Blob) => {
+        let formData = new FormData();
+        formData.append('File', file);
+        return axios.post<Photo>('photos', formData, {
+            headers: {'Content-Type':'multipart/form-data'}
+        })
+    },
+    setMainPhoto: (id: string) => requests.post(`/photos/setMain/${id}`,{}),
+    deletePhoto: (id: string) => requests.del(`/photos/${id}`)
 }
 
 const agent = {
