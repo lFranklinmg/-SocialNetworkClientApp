@@ -243,6 +243,10 @@ export default class ActivityStore{
          
     }
 
+    clearSelectedActivity = () => {
+        this.selectedActivity = undefined;
+    }
+
      /*
     selectActivity = (id: string) =>{
         //var result = this.findActivity(id);
