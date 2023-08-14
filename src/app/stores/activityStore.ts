@@ -137,9 +137,7 @@ export default class ActivityStore{
 
         }catch(error){
             console.log(error);
-            //runInAction(()=>{
-            //    this.loading = false;
-            //})
+      
         }
 
     }
@@ -171,9 +169,6 @@ export default class ActivityStore{
 
         }catch(error){
             console.log(error);
-            //runInAction(()=>{
-            //    this.loading = false;
-            //})
         }
     }
 
@@ -243,30 +238,20 @@ export default class ActivityStore{
          
     }
 
+    updateAttendeeFollowing = (username: string) => {
+        this.activityRegistry.forEach(activity => {
+            activity.attendees.forEach(attendee => {
+                if(attendee.userName == username){
+                    attendee.following ? attendee.followingCount -- : attendee.followersCount ++;
+                    attendee.following = !attendee.following;
+                }
+            })
+        })
+
+    }
+
     clearSelectedActivity = () => {
         this.selectedActivity = undefined;
     }
 
-     /*
-    selectActivity = (id: string) =>{
-        //var result = this.findActivity(id);
-        //this.selectedActivity = result;
-        //this.selectedActivity = this.activities.find(x => x.id == id);
-        this.selectedActivity = this.activityRegistry.get(id);
-        
-    }
-
-    cancelSelectedActivity = ()=>{
-        this.selectedActivity = undefined;
-    }
-
-    openForm = (id?: string)=>{
-        //console.log("Id do item:" + id);
-        id ? this.selectActivity(id) : this.cancelSelectedActivity();
-        this.editMode = true;
-    }
-
-    closeForm = () =>{
-        this.editMode = false;
-    }*/
 }
