@@ -6,7 +6,8 @@ import { User } from '../models/user';
 import { UserFormValues } from '../models/userFormValues';
 import { router } from '../router/Routes';
 import { store } from '../stores/store';
-import { Photo, Profile } from '../models/profile';
+import { Photo, Profile, UserActivity } from '../models/profile';
+import { PaginatedResult } from '../models/pagination';
 
 const sleep = (delay: number) =>{
     return new Promise((resolve) =>{
@@ -24,17 +25,22 @@ axios.interceptors.request.use(config => {
     const token = store.commonStore.token;
     //config.headers = {...config.headers} as AxiosHeaders;
     if(token && config.headers)  (config.headers as AxiosHeaders).set("Authorization", `Bearer ${token}`);
-
     //if(token && config.headers) config.headers.set('Authorization','Bearer ${token}');
-        
     return config;
-})
 
+})
 
 //Axios way back Interceptors | response
 axios.interceptors.response.use(async response => {
         await sleep(1000);
+        const pagination = response.headers['pagination'];
+        if(pagination){
+            response.data = new PaginatedResult(response.data, JSON.parse(pagination));
+            return response as AxiosResponse<PaginatedResult<any>>;
+
+        }
         return response;
+
 }, (error: AxiosError)=>{
     const {data, status, config} = error.response as AxiosResponse;
 
@@ -83,7 +89,8 @@ const requests = {
 }
 
 const Activities = {
-    list: () => requests.get<Activity[]>('/Activities'),
+    //list: (params: URLSearchParams) => requests.get<PaginatedResult<Activity[]>>('/Activities'),
+    list: (params: URLSearchParams) => axios.get<PaginatedResult<Activity[]>>('/Activities',{params}).then(responseBody),
     details: (id: string) => requests.get<Activity>(`/Activities/${id}`),
     create: (activity: ActivityFormValues) => requests.post<void>('/Activities', activity),
     update: (activity: ActivityFormValues) => requests.put<void>(`/Activities/${activity.id}`, activity),
@@ -110,7 +117,8 @@ const Profiles = {
     deletePhoto: (id: string) => requests.del(`/photos/${id}`),
     updateProfile: (profile: Partial<Profile>) => requests.put(`/profiles`,profile),
     updateFollowing: (username: string) => requests.post(`/follow/${username}`,{}),
-    listFollowings: (username: string, predicate: string) => requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`)
+    listFollowings: (username: string, predicate: string) => requests.get<Profile[]>(`/follow/${username}?predicate=${predicate}`),
+    listActivities: (username: string, predicate: string) => requests.get<UserActivity[]>(`/profiles/userActivities/${username}?predicate=${predicate}`)
 
 }
 
